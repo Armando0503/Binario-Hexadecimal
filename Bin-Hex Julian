@@ -1,0 +1,528 @@
+;JULIAN RUIZ CRUZ
+#include "p16F887.inc"   ; TODO INSERT CONFIG CODE HERE USING CONFIG BITS GENERATOR
+ 	__CONFIG	_CONFIG1,	_INTRC_OSC_NOCLKOUT & _WDT_OFF & _PWRTE_OFF & _MCLRE_ON & _CP_OFF & _CPD_OFF & _BOR_OFF & _IESO_ON & _FCMEN_ON & _LVP_OFF 
+ 	__CONFIG	_CONFIG2,	_BOR40V & _WRT_OFF
+
+RES_VECT  CODE    0x0000            ; processor reset vector
+   
+    BCF PORTC,0		;reset
+    MOVLW 0x01
+    MOVWF PORTD
+    
+    BSF PORTC,1		;exec
+    CALL time
+    BCF PORTC,1
+    CALL time
+  
+  GOTO    START                   ; go to beginning of program
+
+MAIN_PROG CODE                      ; let linker place main program
+
+i   EQU 0x20
+j   EQU 0x21
+aux EQU 0x22
+ 
+START
+
+    BANKSEL PORTA ;Selecciona el banco (automaticamente) donde se encutra el puerto A
+    CLRF PORTA ;Colocar  ceros en los 8 bits del puerto A PORTA
+    BANKSEL ANSEL ; Ansel es un registro que hace que se ponga todo como entradas o salidas digitales
+    CLRF ANSEL ;digital I/O
+    CLRF ANSELH
+    BANKSEL TRISA ;
+    CLRF TRISA
+    CLRF TRISB
+    CLRF TRISC
+    CLRF TRISD
+    CLRF TRISE
+    BCF STATUS,RP1
+    BCF STATUS,RP0
+    CLRF PORTA
+    CLRF PORTB ;Colocar  ceros en los 8 bits del puerto B PORTA
+    CLRF PORTC ;Colocar  ceros en los 8 bits del puerto C PORTA
+    CLRF PORTD ;Colocar  ceros en los 8 bits del puerto D PORTA
+    CLRF PORTE ;Colocar  ceros en los 8 bits del puerto E PORTA
+   
+INICIO_LCD
+    BCF PORTC,0		;reset
+    MOVLW 0x01
+    MOVWF PORTD
+    
+    BSF PORTC,1		;exec
+    CALL time
+    BCF PORTC,1
+    CALL time
+    
+    MOVLW 0x0C		;first line
+    MOVWF PORTD
+    
+    BSF PORTC,1		;exec
+    CALL time
+    BCF PORTC,1
+    CALL time
+         
+    MOVLW 0x3C		;cursor mode
+    MOVWF PORTD
+    
+    BSF PORTC,1		;exec
+    CALL time
+    BCF PORTC,1
+    CALL time
+    
+INICIO	  
+   
+    BCF PORTC,0		;command mode
+    CALL time
+    
+    MOVLW 0x80		;LCD position renglon arriba
+    MOVWF PORTD
+    CALL exec
+    
+    BSF PORTC,0		;data mode
+    CALL time
+    
+    
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;MENSAJE 1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    MOVLW 'B'
+    MOVWF PORTD
+    CALL exec
+    MOVLW 'I'
+    MOVWF PORTD
+    CALL exec
+    MOVLW 'N'
+    MOVWF PORTD
+    CALL exec
+    MOVLW 'A'
+    MOVWF PORTD
+    MOVLW 'R'
+    MOVWF PORTD
+    CALL exec
+    MOVLW 'I'
+    MOVWF PORTD
+    CALL exec
+    MOVLW 'O'
+    MOVWF PORTD
+    CALL exec 
+    MOVLW ':'
+    MOVWF PORTD
+    CALL exec
+    
+    ;MOVLW 0x85		;LCD position renglon arriba
+    ;MOVWF PORTD
+    ;CALL exec
+   
+    ;BSF PORTC,0		;data mode
+    ;CALL time
+    ;---------------------------Comandos Binarios--------------------------
+    
+    BTFSC PORTA,7 ; primer Boton
+    CALL mandaruno
+    BTFSS PORTA,7
+    CALL mandarcero
+    
+    BTFSC PORTA,6 ; Segundo Boton
+    CALL mandaruno
+    BTFSS PORTA,6
+    CALL mandarcero
+    
+    BTFSC PORTA,5 ; Tercera Boton
+    CALL mandaruno
+    BTFSS PORTA,5
+    CALL mandarcero
+    
+    BTFSC PORTA,4 ; Cuarta Boton
+    CALL mandaruno
+    BTFSS PORTA,4
+    CALL mandarcero
+    
+    BTFSC PORTA,3 ; Quinta Boton
+    CALL mandaruno
+    BTFSS PORTA,3
+    CALL mandarcero  
+    
+    BTFSC PORTA,2 ; Sexta Boton
+    CALL mandaruno
+    BTFSS PORTA,2
+    CALL mandarcero
+    
+    BTFSC PORTA,1 ; Septima Boton
+    CALL mandaruno
+    BTFSS PORTA,1
+    CALL mandarcero  
+    
+    BTFSC PORTA,0 ; Octavo Boton
+    CALL mandaruno
+    BTFSS PORTA,0
+    CALL mandarcero  
+    
+    
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    BCF PORTC,0		;command mode
+    CALL time
+    
+    MOVLW 0xC0		;LCD position renglon abajo
+    MOVWF PORTD
+    CALL exec
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; MENSAJE HAXADECIMAL;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,,
+    BSF PORTC,0		;data mode
+    CALL time
+    
+    ;MOVLW 0x28 		;message2  0x28
+    ;MOVWF PORTB
+    ;CALL exec 
+    MOVLW 'H'
+    MOVWF PORTD
+    CALL exec 
+    MOVLW 'E'
+    MOVWF PORTD
+    CALL exec 
+    MOVLW 'X'
+    MOVWF PORTD
+    CALL exec 
+    MOVLW 'A'
+    MOVWF PORTD
+    CALL exec 
+    MOVLW ':'
+    MOVWF PORTD
+    CALL exec 
+    
+    MOVLW 0x85		;LCD position
+    MOVWF PORTD
+    CALL exec
+    
+    MOVLW '0'
+    MOVWF PORTD
+    CALL exec 
+    MOVLW 'x'
+    MOVWF PORTD
+    CALL exec 
+    
+    ;prueba 1.0
+    
+    ;mitad izquierda 
+    MOVFW PORTA       ; Se guarda el valor del puerto A en W ¿todo o solo un bit? checar
+    ;MOVWF aux        ;Se guarda el valor de W al registro auxiliar
+    ANDLW b'11110000' ;Se guarda el valor del filtro del and en W
+    ;SWAPF aux,1
+    CALL NumerosHexa  ;Tabla da hexa (checar)
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Detectar combinacion;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
+   
+    ;MOVWF PORTD
+    ;CALL exec
+	
+    ;mitad Derecha y se guarda en W  (aun no trabajo en ella ... .-.)
+    MOVFW PORTA
+    ANDLW b'00001111' ;Realiza la separacion con AND (mitad derecha )
+    ;SWAPF aux,1
+    CALL Numeros2Hexa
+    ;MOVWF PORTD
+    ;CALL exec
+    
+    ;Fin prueba
+    BCF PORTC,0		;command mode despues de aqui no imprimira nada
+    CALL time
+    GOTO INICIO
+
+exec
+    BSF PORTC,1		;exec
+    CALL time
+    BCF PORTC,1
+    CALL time
+    RETURN
+time
+    CLRF i
+    MOVLW d'10'
+    MOVWF j
+ciclo    
+    MOVLW d'80'
+    MOVWF i
+    DECFSZ i
+    GOTO $-1
+    DECFSZ j
+    GOTO ciclo
+    RETURN    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;COMBINACIONES DE NUMEROS BINARIOS;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
+mandaruno
+    MOVLW '1'
+    MOVWF PORTD 
+    CALL exec
+    RETURN
+mandarcero
+    MOVLW '0'
+    MOVWF PORTD
+    CALL exec
+    RETURN
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;COMBINACIONES DE NUMEROS Hexadecimales;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
+NumerosHexa  ;;;;;;;;;;;;;;;;;; AQUI SE REALIZAN Las comparaciones y detecciones para imprimir;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    MOVWF aux ;muevo W a un auxiliar
+    XORLW 0x00 ;0 ;compara si es igual o no el valor
+    BTFSC STATUS,Z ; Z=1 realiza las acciones; Z=0 se saltara la instruccion a la siguiente comparacion
+    GOTO Numero0Hexa ; llama a la imprecion de dicho numero si Z=1
+    MOVF aux,W ; Al no cumplir concidencia el valor de aux regresa a W para repetir hasta encontrar concidencia
+    
+    XORLW 0x10 ;1
+    BTFSC STATUS,Z
+    GOTO Numero1Hexa
+    MOVF aux,W
+    
+    XORLW 0x20 ;2
+    BTFSC STATUS,Z
+    GOTO Numero2Hexa
+    MOVF aux,W
+     
+    XORLW 0x30 ;3
+    BTFSC STATUS,Z
+    GOTO Numero3Hexa
+    MOVF aux,W
+    
+    XORLW 0x40 ;4
+    BTFSC STATUS,Z
+    GOTO Numero4Hexa
+    MOVF aux,W
+    
+    XORLW 0x50 ;5
+    BTFSC STATUS,Z
+    GOTO Numero5Hexa
+    MOVF aux,W
+    
+    XORLW 0x60 ;6
+    BTFSC STATUS,Z
+    GOTO Numero6Hexa
+    MOVF aux,W
+    
+    XORLW 0x70 ;7
+    BTFSC STATUS,Z
+    GOTO Numero7Hexa
+    MOVF aux,W
+    
+    XORLW 0x80 ;8
+    BTFSC STATUS,Z
+    GOTO Numero8Hexa
+    MOVF aux,W
+    
+    XORLW 0x90 ;9
+    BTFSC STATUS,Z
+    GOTO Numero9Hexa
+    MOVF aux,W
+    
+    XORLW 0xA0 ;A
+    BTFSC STATUS,Z
+    GOTO NumeroAHexa
+    MOVF aux,W
+    
+    XORLW 0xB0 ;B
+    BTFSC STATUS,Z
+    GOTO NumeroBHexa
+    MOVF aux,W
+    
+    XORLW 0xC0 ;C
+    BTFSC STATUS,Z
+    GOTO NumeroCHexa
+    MOVF aux,W
+    
+    XORLW 0xD0 ;D
+    BTFSC STATUS,Z
+    GOTO NumeroDHexa
+    MOVF aux,W
+    
+    XORLW 0xE0 ;E
+    BTFSC STATUS,Z
+    GOTO NumeroEHexa
+    MOVF aux,W
+    
+    XORLW 0xF0 ;F
+    BTFSC STATUS,Z
+    GOTO NumeroFHexa
+    RETURN
+    
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; INICIO NUMEROS 2 HEXA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
+    Numeros2Hexa  ;;;;;;;;;;;;;;;;;; AQUI SE REALIZAN Las comparaciones y detecciones para imprimir;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    MOVWF aux ;muevo W a un auxiliar
+    XORLW 0x00 ;0 ;compara si es igual o no el valor
+    BTFSC STATUS,Z ; Z=1 realiza las acciones; Z=0 se saltara la instruccion a la siguiente comparacion
+    GOTO Numero0Hexa ; llama a la imprecion de dicho numero si Z=1
+    MOVF aux,W ; Al no cumplir concidencia el valor de aux regresa a W para repetir hasta encontrar concidencia
+    
+    XORLW 0x01 ;1
+    BTFSC STATUS,Z
+    GOTO Numero1Hexa
+    MOVF aux,W
+    
+    XORLW 0x02 ;2
+    BTFSC STATUS,Z
+    GOTO Numero2Hexa
+    MOVF aux,W
+     
+    XORLW 0x03 ;3
+    BTFSC STATUS,Z
+    GOTO Numero3Hexa
+    MOVF aux,W
+    
+    XORLW 0x04 ;4
+    BTFSC STATUS,Z
+    GOTO Numero4Hexa
+    MOVF aux,W
+    
+    XORLW 0x05 ;5
+    BTFSC STATUS,Z
+    GOTO Numero5Hexa
+    MOVF aux,W
+    
+    XORLW 0x06 ;6
+    BTFSC STATUS,Z
+    GOTO Numero6Hexa
+    MOVF aux,W
+    
+    XORLW 0x07 ;7
+    BTFSC STATUS,Z
+    GOTO Numero7Hexa
+    MOVF aux,W
+    
+    XORLW 0x08 ;8
+    BTFSC STATUS,Z
+    GOTO Numero8Hexa
+    MOVF aux,W
+    
+    XORLW 0x09 ;9
+    BTFSC STATUS,Z
+    GOTO Numero9Hexa
+    MOVF aux,W
+    
+    XORLW 0x0A ;A
+    BTFSC STATUS,Z
+    GOTO NumeroAHexa
+    MOVF aux,W
+    
+    XORLW 0x0B ;B
+    BTFSC STATUS,Z
+    GOTO NumeroBHexa
+    MOVF aux,W
+    
+    XORLW 0x0C ;C
+    BTFSC STATUS,Z
+    GOTO NumeroCHexa
+    MOVF aux,W
+    
+    XORLW 0x0D ;D
+    BTFSC STATUS,Z
+    GOTO NumeroDHexa
+    MOVF aux,W
+    
+    XORLW 0x0E ;E
+    BTFSC STATUS,Z
+    GOTO NumeroEHexa
+    MOVF aux,W
+    
+    XORLW 0x0F ;F
+    BTFSC STATUS,Z
+    GOTO NumeroFHexa
+    RETURN
+    
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; FIN ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+    
+    
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;NUMEROS HEXADECIMALES;;;;;;;;;;;;;;;;;;
+Numero0Hexa
+    MOVLW '0'
+    MOVWF PORTD 
+    BCF STATUS,Z
+    CALL exec
+    RETURN
+Numero1Hexa
+    MOVLW '1'
+    MOVWF PORTD 
+    BCF STATUS,Z
+    CALL exec
+    RETURN
+Numero2Hexa
+    MOVLW '2'
+    MOVWF PORTD 
+    BCF STATUS,Z
+    CALL exec
+    RETURN    
+Numero3Hexa   ; SE ESTA TRABANDO AQUI!!!! PORUQE SOLO DETECTA TRES
+    MOVWF aux 
+    MOVLW '3'
+    MOVWF PORTD 
+    BCF STATUS,Z
+    CALL exec
+    RETURN
+Numero4Hexa
+    MOVLW '4'
+    MOVWF PORTD 
+    BCF STATUS,Z
+    CALL exec
+    RETURN    
+Numero5Hexa
+    MOVLW '5'
+    MOVWF PORTD 
+    BCF STATUS,Z
+    CALL exec
+    RETURN
+Numero6Hexa
+    MOVLW '6'
+    MOVWF PORTD 
+    BCF STATUS,Z
+    CALL exec
+    RETURN    
+Numero7Hexa
+    MOVLW '7'
+    MOVWF PORTD 
+    BCF STATUS,Z
+    CALL exec
+    RETURN
+Numero8Hexa
+    MOVLW '8'
+    MOVWF PORTD 
+    BCF STATUS,Z
+    CALL exec
+    RETURN         
+Numero9Hexa
+    MOVLW '9'
+    MOVWF PORTD 
+    BCF STATUS,Z
+    CALL exec
+    RETURN
+NumeroAHexa
+    MOVLW 'A'
+    MOVWF PORTD 
+    BCF STATUS,Z
+    CALL exec
+    RETURN    
+NumeroBHexa
+    MOVLW 'B'
+    MOVWF PORTD 
+    BCF STATUS,Z
+    CALL exec
+    RETURN
+NumeroCHexa
+    MOVLW 'C' ; IGUAL SE TRABA AQUI EL DATO
+    MOVWF PORTD 
+    BCF STATUS,Z
+    CALL exec
+    RETURN  
+NumeroDHexa
+    MOVWF aux 
+    MOVLW 'D' 
+    MOVWF PORTD 
+    BCF STATUS,Z;MOVF aux,W
+    CALL exec
+    RETURN
+NumeroEHexa
+    MOVLW 'E'
+    MOVWF PORTD 
+    BCF STATUS,Z
+    CALL exec
+    RETURN    
+NumeroFHexa
+    MOVLW 'F'
+    MOVWF PORTD 
+    BCF STATUS,Z
+    CALL exec
+    RETURN    
+    END
